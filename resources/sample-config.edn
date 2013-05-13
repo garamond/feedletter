@@ -1,0 +1,14 @@
+{
+ :from "feedletter@mo2r.com"
+ :to "a@mo2r.com"
+ :feeds ["http://www.heise.de/developer/rss/news-atom.xml"
+         "http://jaxenter.de/news.xml"
+         "http://www.amb-norwegen.ch/?rss=content"
+         "http://www.xkcd.com/atom.xml"
+         "http://feeds.feedburner.com/ucllc/brandnew"
+         "http://www.newyorker.com/online/blogs/elements/rss.xml"
+         "http://bits.blogs.nytimes.com/feed/"
+         "http://daringfireball.net/index.xml"
+         "http://www.guardian.co.uk/theguardian/series/pass-notes/rss
+"]
+ }
