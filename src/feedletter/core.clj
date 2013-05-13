@@ -31,31 +31,35 @@
 (defn zip-feed [url]
   (zip/xml-zip (xml/parse url)))
 
-
 (defn parse-feed [feed-url]
   (let [feed (zip-feed feed-url)]
-    {:title (or (z/xml1-> feed :title z/text) ;; Atom
+    {:title (or (z/xml1-> feed :title z/text)          ;; Atom
                 (z/xml1-> feed :channel :title z/text) ;; RSS
                 )
      :entries
-     (for [e (or (seq (z/xml-> feed :entry)) ;; Atom
+     (for [e (or (seq (z/xml-> feed :entry))          ;; Atom
                  (seq (z/xml-> feed :channel :item))) ;; RSS
            ]
-       (into {}
-             (for [{:keys [tag attrs content]} (:content (zip/node e))]
-               {(keyword tag) (or (first content) (:href attrs))}
-               ))
+
+       {:title (z/xml1-> e :title z/text)
+        :date (or (z/xml1-> e :published z/text) ;; Atom
+                  (z/xml1-> e :pubDate z/text)) ;; RSS
+        :link (or (z/xml1-> e :link (z/attr :href)) ;; Atom
+                  (z/xml1-> e :link z/text))} ;; RSS
        )}))
+
+(defn gen-id [entry]
+  (apply str (map entry [:date :title])))
 
 (defn process-feed [m]
   (let [state (read-state (:title m))
-        m' (update-in m [:entries] (fn [ex] (remove #(some #{(:title %)} state) ex)))]
-    (write-state (:title m) (concat state (map :title (:entries m'))))
+        m' (update-in m [:entries] (fn [ex] (remove #(some #{(gen-id %)} state) ex)))]
+    (write-state (:title m) (concat state (map gen-id (:entries m'))))
     m'
     ))
 
 (defn make-body [entry]
-  (str (:title entry) "\n" (or (:published entry) (:pubDate entry)) "\n" (:link entry) "\n\n"))
+  (str (:title entry) "\n" (:date entry) "\n" (:link entry) "\n\n"))
 
 (defn make-message [cfg m]
   {:from (or (:from cfg) "feedmail")
