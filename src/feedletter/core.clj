@@ -5,6 +5,7 @@
             [clojure.zip :as zip]
             [clojure.edn :as edn]
             [clojure.data.zip.xml :as z]
+            [clojure.tools.logging :as log]
             [postal.core :as p])
   (:gen-class))
 
@@ -21,7 +22,7 @@
 (defn read-state [feed-name]
   (try
     (read-res (state-token feed-name))
-    (catch Exception e {})))
+    (catch Exception e #{})))
 
 (defn write-state [feed-name m]
   (do
@@ -49,12 +50,12 @@
        )}))
 
 (defn gen-id [entry]
-  (apply str (map entry [:date :title])))
+  (s/join " " (mapv entry [:date :title])))
 
 (defn process-feed [m]
   (let [state (read-state (:title m))
         m' (update-in m [:entries] (fn [ex] (remove #(some #{(gen-id %)} state) ex)))]
-    (write-state (:title m) (concat state (map gen-id (:entries m'))))
+    (write-state (:title m) (apply conj state (map gen-id (:entries m'))))
     m'
     ))
 
@@ -62,15 +63,15 @@
   (str (:title entry) "\n" (:date entry) "\n" (:link entry) "\n\n"))
 
 (defn make-message [cfg m]
-  {:from (or (:from cfg) "feedmail")
+  {:from (or (:from cfg) "feedletter")
    :to (:to cfg)
-   :subject (s/join " " ["Feed update:" (:title m) "--" (count (:entries m)) "new items"])
+   :subject (s/join " " [(or (:subject cfg) "Feed update:") (:title m) "-" (count (:entries m)) "new items"])
    :body (apply str (map make-body (:entries m)))})
 
 (defn -main [& args]
   (let [cfg (read-res (first args))]
     (doseq [f (:feeds cfg)]
-      (println "processing" f)
+      (log/debug "processing" f)
       (->> f
            parse-feed
            process-feed
