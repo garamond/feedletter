@@ -55,7 +55,7 @@
 (defn process-feed [m]
   (let [state (read-state (:title m))
         m' (update-in m [:entries] (fn [ex] (remove #(some #{(gen-id %)} state) ex)))]
-    (write-state (:title m) (apply conj state (map gen-id (:entries m'))))
+    (write-state (:title m) (into #{} (concat state (map gen-id (:entries m')))))
     m'
     ))
 
