@@ -2,7 +2,8 @@
  :from "feedletter@example.com"
  :to "me@example.com"
  :feeds ["http://www.xkcd.com/atom.xml"
-         "http://www.newyorker.com/online/blogs/elements/rss.xml"
+         {:url "http://www.newyorker.com/online/blogs/elements/rss.xml"
+          :archive true}
          "http://bits.blogs.nytimes.com/feed/"
          "http://daringfireball.net/index.xml"]
  }

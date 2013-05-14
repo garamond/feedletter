@@ -1,6 +1,6 @@
 # feedletter
 
-Send Atom or RSS feed updates via plain-text email.
+Send Atom or RSS feed updates via plain-text email (one per feed). Optionally, feed items can be archived (HTML file only).
 
 ## Usage
 
@@ -10,7 +10,8 @@ Send Atom or RSS feed updates via plain-text email.
      :from "feedletter@example.com"
      :to "me@example.com"
      :feeds ["http://www.xkcd.com/atom.xml"
-             "http://www.newyorker.com/online/blogs/elements/rss.xml"
+             {:url "http://www.newyorker.com/online/blogs/elements/rss.xml"
+              :archive true}
              "http://bits.blogs.nytimes.com/feed/"
              "http://daringfireball.net/index.xml"]
      }
@@ -21,7 +22,7 @@ Send Atom or RSS feed updates via plain-text email.
 
 ### Reset
 
-    rm -rf .state
+    rm -rf .archive
     
 ## Sample feedletter
 
