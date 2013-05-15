@@ -39,7 +39,6 @@
      (for [e (or (seq (z/xml-> feed :entry))          ;; Atom
                  (seq (z/xml-> feed :channel :item))) ;; RSS
            ]
-
        {:title (z/xml1-> e :title z/text)
         :date (or (z/xml1-> e :published z/text) ;; Atom
                   (z/xml1-> e :pubDate z/text)) ;; RSS
@@ -57,7 +56,8 @@
       (log/debug "archiving" e)
       (spit (io/file out-dir (str (gen-id e) ".html"))
             (try (slurp (s/replace (:link e) " " "+"))
-                 (catch Exception ex "content not available"))))))
+                 (catch Exception ex "content not available")))))
+  fd)
 
 (defn process-feed [fd]
   (let [state (read-state (:name fd))
@@ -69,25 +69,26 @@
 (defn entry-str [entry]
   (str (:title entry) "\n" (:date entry) "\n" (:link entry) "\n\n"))
 
-(defn make-message [cfg fd]
+(defn make-msg [cfg fd]
   {:from (or (:from cfg) "feedletter")
    :to (:to cfg)
    :subject (s/join " " [(or (:subject cfg) "Feed update:") (:name fd) "-" (count (:entries fd)) "new items"])
    :body (apply str (map entry-str (:entries fd)))})
+
+(defn send-msg [msg]
+  (when (seq (:body msg))
+    (log/debug "sending feedletter" (:subject msg))
+    (p/send-message msg)))
 
 (defn -main [& args]
   (let [cfg (read-res (first args))]
     (doseq [f (:feeds cfg)]
       (log/debug "processing" f)
       (.mkdirs *archive-dir*)
-      (->> (or (:url f) f)
-           parse-feed
-           process-feed
-           (#(if (:archive f)
-               (archive-feed! %)
-               %))
-           (make-message cfg)
-           (#(when (seq (:body %))
-               (log/debug "sending feedletter to" (:to cfg))
-               (p/send-message %)))
-           ))))
+      (cond->> (or (:url f) f)
+               true parse-feed
+               true process-feed
+               (:archive f) archive-feed!
+               true (make-msg cfg)
+               true send-msg
+               ))))
