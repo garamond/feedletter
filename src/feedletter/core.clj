@@ -57,7 +57,7 @@
       (spit (io/file out-dir (str (gen-id e) ".html"))
             (try (slurp (s/replace (:link e) " " "+"))
                  (catch Exception ex "content not available")))))
-  fd)
+  (:name fd))
 
 (defn process-feed [fd]
   (let [state (read-state (:name fd))
@@ -81,14 +81,18 @@
     (p/send-message msg)))
 
 (defn -main [& args]
-  (let [cfg (read-res (first args))]
+  (let [cfg (read-res (first args))
+        a (atom [])]
     (doseq [f (:feeds cfg)]
       (log/debug "processing" f)
       (.mkdirs *archive-dir*)
       (cond->> (or (:url f) f)
                true parse-feed
                true process-feed
-               (:archive f) archive-feed!
+               (:archive f) (#(do (swap! a conj (future (archive-feed! %))) %))
                true (make-msg cfg)
                true send-msg
-               ))))
+               ))
+    (doall (map deref @a))
+    (shutdown-agents)
+    (log/debug "finished")))
