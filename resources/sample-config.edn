@@ -1,6 +1,9 @@
 {
  :from "feedletter@example.com"
  :to "me@example.com"
+ ;; :smtp {:host "example.org"
+ ;;        :user "username"
+ ;;        :pass "password"}
  :feeds ["http://www.xkcd.com/atom.xml"
          {:url "http://www.newyorker.com/online/blogs/elements/rss.xml"
           :archive true}

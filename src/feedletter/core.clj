@@ -69,10 +69,11 @@
   (str (:title entry) "\n" (:date entry) "\n" (:link entry) "\n\n"))
 
 (defn make-msg [cfg fd]
-  {:from (or (:from cfg) "feedletter")
-   :to (:to cfg)
-   :subject (s/join " " [(or (:subject cfg) "Feed update:") (:name fd) "-" (count (:entries fd)) "new items"])
-   :body (apply str (map entry-str (:entries fd)))})
+  (with-meta {:from (or (:from cfg) "feedletter")
+              :to (:to cfg)
+              :subject (s/join " " [(or (:subject cfg) "Feed update:") (:name fd) "-" (count (:entries fd)) "new items"])
+              :body (apply str (map entry-str (:entries fd)))}
+    (or (:smtp cfg) {})))
 
 (defn send-msg [msg]
   (when (seq (:body msg))
