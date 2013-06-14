@@ -14,15 +14,15 @@
       slurp
       edn/read-string))
 
-(def ^:dynamic *archive-dir* (io/file ".archive"))
+(def ^:dynamic *state-dir* (io/file ".state"))
 
 (defn state-token [feed-name]
-  (io/file *archive-dir* (str feed-name ".edn")))
+  (io/file *state-dir* (str feed-name ".edn")))
 
 (defn read-state [feed-name]
   (try
     (read-res (state-token feed-name))
-    (catch Exception e {})))
+    (catch Exception e #{})))
 
 (defn write-state! [feed-name s]
   (spit (state-token feed-name) (prn-str s)))
@@ -32,41 +32,27 @@
 
 (defn parse-feed [feed-url]
   (let [feed (zip-feed feed-url)]
-    {:name (or (z/xml1-> feed :title z/text)          ;; Atom
-                (z/xml1-> feed :channel :title z/text) ;; RSS
-                )
+    {:name (or (z/xml1-> feed :title z/text)           ;; Atom
+               (z/xml1-> feed :channel :title z/text)  ;; RSS
+               )
      :entries
      (for [e (or (seq (z/xml-> feed :entry))          ;; Atom
                  (seq (z/xml-> feed :channel :item))) ;; RSS
            ]
        {:title (z/xml1-> e :title z/text)
-        :date (or (z/xml1-> e :published z/text) ;; Atom
-                  (z/xml1-> e :pubDate z/text)) ;; RSS
         :link (or (z/xml1-> e :link (z/attr :href)) ;; Atom
-                  (z/xml1-> e :link z/text))} ;; RSS
+                  (z/xml1-> e :link z/text))}       ;; RSS
        )}))
-
-(defn gen-id [entry]
-  (s/reverse (s/replace (str (mapv entry [:date :title])) #"\W" "")))
-
-(defn archive-feed! [fd]
-  (let [out-dir (io/file *archive-dir* (:name fd))]
-    (.mkdirs out-dir)
-    (doseq [e (:entries fd)]
-      (log/debug "archiving" e)
-      (spit (io/file out-dir (str (gen-id e) ".html"))
-            (slurp (s/replace (:link e) " " "+")))))
-  (:name fd))
 
 (defn process-feed [fd]
   (let [state (read-state (:name fd))
-        fd' (update-in fd [:entries] (fn [ex] (remove #(some #{(gen-id %)} (keys state)) ex)))]
-    (write-state! (:name fd) (reduce merge state (map #(hash-map (gen-id %) %) (:entries fd'))))
+        fd' (update-in fd [:entries] (fn [ex] (remove #(some #{(:title %)} (keys state)) ex)))]
+    (write-state! (:name fd) (reduce merge state (map :title (:entries fd'))))
     fd'
     ))
 
 (defn entry-str [entry]
-  (str (:title entry) "\n" (:date entry) "\n" (:link entry) "\n\n"))
+  (str (:title entry) "\n" (:link entry) "\n\n"))
 
 (defn make-msg [cfg fd]
   (with-meta {:from (or (:from cfg) "feedletter")
@@ -84,19 +70,14 @@
   (log/error s))
 
 (defn -main [& args]
-  (let [cfg (read-res (first args))
-        a (agent [])]
-    (set-error-handler! a err)
+  (let [cfg (read-res (first args))]
     (doseq [f (:feeds cfg)]
       (log/debug "processing" f)
-      (.mkdirs *archive-dir*)
-      (cond->> (or (:url f) f)
-               true parse-feed
-               true process-feed
-               (:archive f) (#(do (send a (fn [s] conj s (archive-feed! %))) %))
-               true (make-msg cfg)
-               true send-msg
-               ))
-    (await a)
-    (shutdown-agents)
+      (.mkdirs *state-dir*)
+      (->> f
+           parse-feed
+           process-feed
+           (make-msg cfg)
+           send-msg
+           ))
     (log/debug "finished")))

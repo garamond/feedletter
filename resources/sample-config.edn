@@ -5,8 +5,7 @@
  ;;        :user "username"
  ;;        :pass "password"}
  :feeds ["http://www.xkcd.com/atom.xml"
-         {:url "http://www.newyorker.com/online/blogs/elements/rss.xml"
-          :archive true}
+         "http://www.newyorker.com/online/blogs/elements/rss.xml"
          "http://bits.blogs.nytimes.com/feed/"
          "http://daringfireball.net/index.xml"]
  }
