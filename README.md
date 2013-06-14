@@ -21,7 +21,7 @@ Send Atom or RSS feed updates via plain-text email (one per feed). Optionally, f
 
 ### Reset
 
-    rm -rf .archive
+    rm -rf .state
     
 ## Sample feedletter
 
