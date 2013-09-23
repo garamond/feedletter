@@ -30,6 +30,9 @@
 (defn zip-feed [url]
   (zip/xml-zip (xml/parse url)))
 
+(defn escape-str [s]
+  (s/escape s {\/ " "}))
+
 (defn parse-feed [feed-url]
   (let [feed (zip-feed feed-url)]
     {:name (or (z/xml1-> feed :title z/text)           ;; Atom
@@ -46,8 +49,8 @@
 
 (defn process-feed [fd]
   (let [state (read-state (:name fd))
-        fd' (update-in fd [:entries] (fn [ex] (remove #(some #{(:title %)} (keys state)) ex)))]
-    (write-state! (:name fd) (reduce merge state (map :title (:entries fd'))))
+        fd' (update-in fd [:entries] (fn [ex] (remove #(some #{(escape-str (:title %))} state) ex)))]
+    (write-state! (escape-str (:name fd)) (reduce merge state (map #(escape-str (:title %)) (:entries fd'))))
     fd'
     ))
 
