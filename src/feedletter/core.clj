@@ -67,17 +67,16 @@
                 [:div [:h2 [:a {:href (:link entry)} (:title entry)]] (if-let [desc (:desc entry)] [:p desc])]))))
 
 (defn make-msg [cfg fd]
-  (with-meta {:from (s/join [(:name fd) " <" (:from cfg) ">"])
-              :to (:to cfg)
-              :subject (s/join [(:name fd) " feed: " (count (:entries fd)) " new items"])
-              :body [{:type "text/html; charset=utf-8"
-                      :content (msg-html (:entries fd))}]}
-    (or (:smtp cfg) {})))
+  {:from (s/join [(:name fd) " <" (:from cfg) ">"])
+   :to (:to cfg)
+   :subject (s/join [(:name fd) " feed: " (count (:entries fd)) " new items"])
+   :body [{:type "text/html; charset=utf-8"
+           :content (msg-html (:entries fd))}]})
 
-(defn send-msg [msg]
+(defn send-msg [cfg msg]
   (when (seq (:content (first (:body msg))))
     (log/debug "sending feedletter" (:subject msg))
-    (p/send-message msg)))
+    (p/send-message (or (:smtp cfg) {}) msg)))
 
 (defn err [s]
   (log/error s))
@@ -91,6 +90,6 @@
            parse-feed
            process-feed
            (make-msg cfg)
-           send-msg
+           (send-msg cfg)
            ))
     (log/debug "finished")))
