@@ -21,6 +21,12 @@ Create file `config.edn`
              "http://daringfireball.net/feeds/main"]
      }
 
+### Build
+
+With [Leiningen](http://leiningen.org):
+
+    lein uberjar
+
 ### Run
 
     java -jar feedletter.jar
