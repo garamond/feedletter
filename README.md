@@ -1,6 +1,6 @@
 # feedletter
 
-Send Atom or RSS feed updates via plain-text email (one per feed). Optionally, feed items can be archived (HTML file only).
+Send Atom or RSS feed updates via HTML email (one per feed per execution).
 
 ## Usage
 
@@ -29,3 +29,6 @@ Create file `config.edn`
 
     rm -rf .state
     
+### Screenshot
+
+![Screenshot](screenshot.png)
