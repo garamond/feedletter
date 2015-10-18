@@ -1,11 +1,14 @@
 {
- :from "feedletter@example.com"
- :to "me@example.com"
+ :from "feedletter@example.org"
+ :to "me@example.org"
  ;; :smtp {:host "example.org"
  ;;        :user "username"
- ;;        :pass "password"}
- :feeds ["http://www.xkcd.com/atom.xml"
-         "http://www.newyorker.com/online/blogs/elements/rss.xml"
+ ;;        :pass "password"
+ ;;        :ssl true}
+ :feeds [
+         "http://www.xkcd.com/atom.xml"
+         "http://bldgblog.blogspot.ch/atom.xml"
          "http://bits.blogs.nytimes.com/feed/"
-         "http://daringfireball.net/index.xml"]
+         "http://daringfireball.net/feeds/main"
+         ]
  }
