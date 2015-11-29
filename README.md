@@ -4,6 +4,10 @@ Send Atom or RSS feed updates via HTML email (one per feed per execution).
 
 ## Usage
 
+### Download
+
+	wget https://github.com/garamond/feedletter/raw/master/feedletter.jar
+
 ### Configure
 
 Create file `config.edn`
@@ -21,12 +25,6 @@ Create file `config.edn`
              "http://daringfireball.net/feeds/main"]
      }
 
-### Build
-
-With [Leiningen](http://leiningen.org):
-
-    lein uberjar
-
 ### Run
 
     java -jar feedletter.jar
@@ -38,3 +36,10 @@ With [Leiningen](http://leiningen.org):
 ### Screenshot
 
 ![Screenshot](screenshot.png)
+
+## Build
+
+With [Leiningen](http://leiningen.org):
+
+    lein uberjar
+

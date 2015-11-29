@@ -65,11 +65,13 @@
 (defn -main [& args]
   (let [cfg (read-rsrc (if (seq args) (first args) "config.edn"))]
     (doseq [url (:feeds cfg)]
-      (info "processing" url)
-      (.mkdirs state-dir)
-      (->> url
-           fp/parse-feed
-           update-entries
-           (make-msg cfg)
-           (send-msg cfg)))
+      (try
+        (info "processing" url)
+        (.mkdirs state-dir)
+        (->> url
+             fp/parse-feed
+             update-entries
+             (make-msg cfg)
+             (send-msg cfg))
+        (catch Exception e (error (.getMessage e)))))
     (info "finished")))
