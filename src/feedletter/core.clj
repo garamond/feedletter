@@ -26,6 +26,11 @@
 (defn write-state! [feed-title s]
   (spit (state-token feed-title) (prn-str s)))
 
+(defn feed-title [feed]
+  (if (empty? (:title feed))
+    (assoc feed :title (-> (java.net.URI. (:link feed)) .getHost))
+    feed))
+
 (defn entry-date [entry]
   (or (:updated-date entry) (:published-date entry)))
 
@@ -70,8 +75,9 @@
         (.mkdirs state-dir)
         (->> url
              fp/parse-feed
+             feed-title
              update-entries
              (make-msg cfg)
              (send-msg cfg))
-        (catch Exception e (error (.getMessage e)))))
+        (catch Exception e (error (.printStackTrace e)))))
     (info "finished")))
