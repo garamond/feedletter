@@ -79,5 +79,5 @@
              update-entries
              (make-msg cfg)
              (send-msg cfg))
-        (catch Exception e (error (.printStackTrace e)))))
+        (catch Exception e (.printStackTrace e))))
     (info "finished")))
