@@ -56,9 +56,9 @@
                     [:p (str date)])]))))
 
 (defn make-msg [cfg feed]
-  {:from    (s/join ["\""(:title feed) "\" <" (:from cfg) ">"])
+  {:from    (format "\"%s\" <%s>" (:title feed) (:from cfg))
    :to      (:to cfg)
-   :subject (s/join [(:title feed) ": " (count (:entries feed)) " new items"])
+   :subject (format "%s: %s new items" (:title feed) (count (:entries feed)))
    :body    [{:type    "text/html; charset=utf-8"
               :content (msg-html feed)}]})
 
