@@ -3,3 +3,5 @@ pom.xml
 target/
 config.edn
 .state
+*.iml
+.idea
