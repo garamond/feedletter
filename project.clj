@@ -1,4 +1,4 @@
-(defproject feedletter "0.4.1-SNAPSHOT"
+(defproject feedletter "0.4.2"
   :description "Send Atom and RSS feed updates via email"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojars.scsibug/feedparser-clj "0.4.0"]
