@@ -5,3 +5,4 @@ config.edn
 .state
 *.iml
 .idea
+.lein-repl-history

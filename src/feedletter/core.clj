@@ -73,11 +73,16 @@
       (try
         (info "processing" url)
         (.mkdirs state-dir)
-        (->> url
-             fp/parse-feed
-             feed-title
-             update-entries
-             (make-msg cfg)
-             (send-msg cfg))
+        (let [input-stream (-> (java.net.URL. url)
+				       	       .openConnection
+				               (doto (.setRequestProperty "User-Agent"
+				                                          "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11"))
+				               .getContent)]
+	      (->> input-stream
+	       	   fp/parse-feed
+	           feed-title
+	           update-entries
+	           (make-msg cfg)
+	           (send-msg cfg)))
         (catch Exception e (.printStackTrace e))))
     (info "finished")))
