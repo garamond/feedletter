@@ -6,7 +6,7 @@ Send Atom or RSS feed updates via HTML email (one per feed per execution).
 
 ### Download
 
-	wget https://github.com/garamond/feedletter/raw/master/feedletter.jar
+	wget https://github.com/garamond/feedletter/releases/download/0.4.2/feedletter.jar
 
 ### Configure
 
