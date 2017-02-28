@@ -50,7 +50,8 @@
                (for [entry (:entries feed)]
                  [:div
                   [:h2 [:a {:href (:link entry)} (:title entry)]]
-                  (if-let [contents (-> entry :contents first :value)]
+                  (if-let [contents (or (-> entry :contents first :value)
+                                        (-> entry :description :value))]
                     [:p contents])
                   (if-let [date (entry-date entry)]
                     [:p (str date)])]))))
