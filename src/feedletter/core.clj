@@ -44,7 +44,7 @@
                                            :date (entry-date %)}) new-entries)))
     (assoc feed :entries new-entries)))
 
-(defn msg-html [feed]
+(defn msg-html [cfg feed]
   (h/html
     (interpose [:div {:style "clear:both;"} [:hr]]
                (for [entry (:entries feed)]
@@ -52,16 +52,16 @@
                   [:h2 [:a {:href (:link entry)} (:title entry)]]
                   (if-let [contents (or (-> entry :contents first :value)
                                         (-> entry :description :value))]
-                    [:p contents])
+                    [:p (if (:filter-imgs cfg) (s/replace contents #"<img.*>" "") contents)])
                   (if-let [date (entry-date entry)]
                     [:p (str date)])]))))
 
 (defn make-msg [cfg feed]
   {:from    (format "\"%s\" <%s>" (:title feed) (:from cfg))
    :to      (:to cfg)
-   :subject (format "%s: %s new items" (:title feed) (count (:entries feed)))
+   :subject (format "News feed: %s new items" (count (:entries feed)))
    :body    [{:type    "text/html; charset=utf-8"
-              :content (msg-html feed)}]})
+              :content (msg-html cfg feed)}]})
 
 (defn send-msg [cfg msg]
   (when (seq (:content (first (:body msg))))
