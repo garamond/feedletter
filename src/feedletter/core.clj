@@ -45,7 +45,7 @@
     (assoc feed :entries new-entries)))
 
 (defn make-subject [cfg feed]
-  (format "%s: %s new items" (:title feed) (count (:entries feed))))
+  (format "Feed %s: %s new items" (:title feed) (count (:entries feed))))
 
 (defn msg-html [cfg feed]
   (h/html
@@ -54,18 +54,20 @@
                (for [entry (:entries feed)]
                  [:div
                   [:h2 [:a {:href (:link entry)} (:title entry)]]
-                  ;(if-let [contents (or (-> entry :contents first :value)
-                  ;                      (-> entry :description :value))]
-                  ;  [:p (if (:filter-imgs cfg) (s/replace contents #"<img.*>" "") contents)])
+                  (if-let [contents (or (-> entry :summary :value)
+                                        (-> entry :description :value))]
+                    [:p (if (:filter-imgs cfg) (s/replace contents #"<img.*>" "") contents)])
                   (if-let [date (entry-date entry)]
                     [:p (str date)])]))))
 
 (defn make-msg [cfg feed]
-  {:from    (format "\"%s\" <%s>" (:title feed) (:from cfg))
-   :to      (:to cfg)
-   :subject (make-subject cfg feed)
-   :body    [{:type    "text/html; charset=utf-8"
-              :content (msg-html cfg feed)}]})
+  (if (> (count (:entries feed)) 0)
+    { :from    (format "\"%s\" <%s>" (:title feed) (:from cfg))
+      :to      (:to cfg)
+      :subject (make-subject cfg feed)
+      :body    [{:type    "text/html; charset=utf-8"
+                  :content (msg-html cfg feed)}]}
+    {}))
 
 (defn send-msg [cfg msg]
   (when (seq (:content (first (:body msg))))
